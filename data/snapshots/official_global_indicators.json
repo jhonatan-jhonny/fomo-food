@@ -1,0 +1,51 @@
+{
+  "food_waste": {
+    "value_tonnes": 1052000000,
+    "reference_year": 2022,
+    "source": "UNEP — Food Waste Index Report 2024",
+    "source_url": "https://www.unep.org/resources/publication/food-waste-index-report-2024",
+    "indicator": "Desperdício global no varejo, serviços de alimentação e domicílios",
+    "note": "Inclui partes comestíveis e não comestíveis. O relatório publica 1,052 bilhão de toneladas em 2022; o contador diário é uma média matemática."
+  },
+  "undernourishment": {
+    "label": "Pessoas em situação de fome",
+    "value": 645000000,
+    "unit": "pessoas",
+    "reference_year": 2025,
+    "source": "FAO — SOFI 2026",
+    "source_url": "https://www.fao.org/director-general/speeches/details/launch-of-the-state-of-food-security-and-nutrition-in-the-world-%28sofi%29-2026-report-statement/",
+    "indicator": "Número estimado de pessoas em subnutrição crônica",
+    "original_value": "645 milhões de pessoas (estimativa central)",
+    "note": "Hunger/fome é usado pela FAO como sinônimo de subnutrição crônica neste indicador."
+  },
+  "food_insecurity": {
+    "label": "Insegurança alimentar moderada ou grave",
+    "value": 2100000000,
+    "unit": "pessoas",
+    "reference_year": 2025,
+    "source": "FAO — SOFI 2026",
+    "source_url": "https://www.fao.org/director-general/speeches/details/launch-of-the-state-of-food-security-and-nutrition-in-the-world-%28sofi%29-2026-report-statement/",
+    "indicator": "Pessoas em insegurança alimentar moderada ou grave",
+    "original_value": "2,1 bilhões de pessoas",
+    "note": "Estimativa global; não equivale ao indicador de subnutrição crônica."
+  },
+  "malnutrition_deaths": {
+    "label": "Mortes infantis associadas à má nutrição",
+    "value": 2400000,
+    "reference_year": 2021,
+    "source": "OMS — Infant and young child feeding",
+    "source_url": "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding",
+    "indicator": "Mortes de crianças associadas à má nutrição materna e infantil",
+    "original_value": "2,4 milhões de mortes infantis associadas por ano",
+    "note": "Associação epidemiológica, não contagem de eventos em tempo real nem afirmação de causalidade individual."
+  },
+  "environment": {
+    "value": "8–10%",
+    "unit": "das emissões globais de gases de efeito estufa",
+    "reference_year": 2022,
+    "source": "UNEP — Food Waste Index Report 2024",
+    "source_url": "https://www.unep.org/resources/publication/food-waste-index-report-2024",
+    "indicator": "Participação estimada da perda e do desperdício de alimentos nas emissões globais",
+    "note": "Faixa global publicada; não deve ser somada a outros inventários sem harmonização metodológica."
+  }
+}
