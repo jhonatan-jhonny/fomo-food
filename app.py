@@ -133,6 +133,14 @@ def render_home() -> None:
     food_insecurity = global_food_insecurity()
     healthy_diet = global_healthy_diet_unaffordable()
 
+    live_food_waste_counters(food_waste)
+    st.markdown(
+        '<div class="source-strip"><strong>Estimativa em tempo real baseada no último dado '
+        "oficial disponível.</strong> O total anual é distribuído pelo tempo apenas para mostrar "
+        "uma taxa média; o desperdício real não ocorre de modo uniforme.</div>",
+        unsafe_allow_html=True,
+    )
+
     section_intro(
         "Fome no mundo",
         "Três medidas diferentes da privação alimentar",
@@ -261,16 +269,9 @@ def render_home() -> None:
 - Peso desperdiçado não pode ser convertido diretamente em refeições sem conhecer a composição dos alimentos.
 - Uma estimativa de refeições deve usar somente a parcela comestível quando houver base confiável.
 
-Por isso, o FOMO não transforma automaticamente todo o total global em refeições. A equivalência abaixo aparece apenas porque o relatório do UNEP publica um cenário conservador específico para a parcela domiciliar.
+Por isso, o FOMO não transforma automaticamente todo o total global em refeições. A equivalência exibida no início aparece apenas porque o relatório do UNEP publica um cenário conservador específico para a parcela domiciliar.
             """
         )
-    st.markdown(
-        '<div class="source-strip"><strong>Estimativa em tempo real baseada no último dado '
-        "oficial disponível.</strong> O total anual é distribuído pelo tempo apenas para mostrar "
-        "uma taxa média; o desperdício real não ocorre de modo uniforme.</div>",
-        unsafe_allow_html=True,
-    )
-    live_food_waste_counters(food_waste)
     calculation_details(food_waste, "Como este contador é calculado?")
     with st.expander("Como a equivalência alimentar foi estimada?"):
         st.markdown(
