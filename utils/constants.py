@@ -77,3 +77,14 @@ FAO_SOFI_2026_URL = (
 WHO_NUTRITION_URL = (
     "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding"
 )
+FAO_ENERGY_REQUIREMENTS_URL = "https://www.fao.org/4/y5686e/y5686e04.htm"
+WFP_RATION_REFERENCE_URL = "https://executiveboard.wfp.org/document_download/WFP-145552"
+
+# Parâmetros transparentes do cenário de equivalência alimentar. O UNEP usa os três
+# primeiros no Food Waste Index 2024. A referência de 2.100 kcal/dia é um valor
+# operacional arredondado; necessidades individuais variam.
+HOUSEHOLD_WASTE_SHARE = 0.60
+CONSERVATIVE_EDIBLE_SHARE = 0.25
+REFERENCE_MEAL_KG = 0.420
+REFERENCE_DAILY_KCAL = 2_100.0
+REFERENCE_MEALS_PER_DAY = 3

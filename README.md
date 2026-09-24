@@ -6,7 +6,8 @@ sem apresentar taxas matemáticas como eventos detectados em tempo real.
 
 ## O que funciona nesta versão
 
-- contador de alimentos desperdiçados desde 00:00, derivado do total anual do UNEP;
+- contador em toneladas de alimentos desperdiçados desde 00:00, derivado do total anual do UNEP;
+- equivalência estimada em refeições e pessoas alimentadas por um dia, com hipóteses visíveis;
 - estimativa diária de mortes infantis **associadas** à má nutrição, com ressalva explícita;
 - totais globais mais recentes de fome e insegurança alimentar publicados pela FAO;
 - consulta por país de população, subnutrição, insegurança alimentar e pobreza;
@@ -145,6 +146,37 @@ taxa média por segundo = valor anual / 31.536.000
 estimativa de hoje = taxa média × segundos decorridos desde 00:00
 ```
 
+Os resultados principais são exibidos em toneladas. Quilogramas permanecem somente
+quando são a unidade mais natural, como nos indicadores por pessoa.
+
+### Equivalência em refeições
+
+O cálculo nutricional reproduz o cenário conservador do UNEP para o desperdício
+domiciliar:
+
+```text
+parcela potencialmente comestível = desperdício total × 60% domiciliar × 25% comestível
+refeições potenciais = parcela comestível em kg / 0,420 kg
+pessoas por um dia = refeições potenciais / 3
+```
+
+O UNEP usa 420 g por refeição e mostra que a hipótese conservadora de 25% de partes
+comestíveis nos domicílios equivale a aproximadamente 376 bilhões de refeições por ano.
+Para explicitar a dimensão energética, o painel adota 2.100 kcal por pessoa/dia e três
+refeições, resultando em 700 kcal por refeição e densidade implícita de cerca de
+1.667 kcal/kg. Essa referência é próxima de rações operacionais do WFP; não é uma
+prescrição individual.
+
+Fontes metodológicas:
+
+- UNEP Food Waste Index 2024: <https://www.unep.org/resources/publication/food-waste-index-report-2024>
+- FAO/OMS, necessidades energéticas humanas: <https://www.fao.org/4/y5686e/y5686e04.htm>
+- Referência operacional de ração do WFP: <https://executiveboard.wfp.org/document_download/WFP-145552>
+
+Alimentos têm diferentes teores de água, energia e nutrientes. A estimativa não considera
+segurança sanitária, deterioração, coleta, transporte, preparo ou acesso e não significa
+que o volume desperdiçado esteja efetivamente disponível para redistribuição.
+
 `@st.fragment(run_every="1s")` redesenha somente os cards animados. Dados remotos não
 são consultados dentro do fragmento. O fuso usado para reiniciar o dia é
 `America/Sao_Paulo`.
@@ -157,6 +189,8 @@ são consultados dentro do fragmento. O fuso usado para reiniciar o dia é
   agregada de perda pré-varejo, mas não multiplica indevidamente uma pela outra.
 - Estimativas nacionais de desperdício podem ser extrapoladas pelo UNEP e ter diferentes
   graus de confiança.
+- As equivalências em refeições e pessoas são cenários ilustrativos. Necessidades
+  energéticas variam por idade, sexo, massa corporal, saúde e atividade física.
 - Anos variam entre indicadores; o painel mostra o ano real de cada série.
 
 ## Como adicionar um indicador

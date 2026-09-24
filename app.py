@@ -20,13 +20,21 @@ from data.owid import fetch_grapher
 from data.unep import environmental_facts, global_food_waste
 from data.who import malnutrition_associated_deaths
 from data.world_bank import fetch_indicator
+from services.calculations import estimate_feeding_potential, kg_to_tonnes
 from services.counters import counter_values
 from services.data_service import country_dashboard, production_by_category
 from utils.constants import (
     APP_TIMEZONE,
     APP_TITLE,
+    CONSERVATIVE_EDIBLE_SHARE,
     COUNTRIES,
+    FAO_ENERGY_REQUIREMENTS_URL,
+    HOUSEHOLD_WASTE_SHARE,
+    REFERENCE_DAILY_KCAL,
+    REFERENCE_MEAL_KG,
+    REFERENCE_MEALS_PER_DAY,
     UNEP_REPORT_URL,
+    WFP_RATION_REFERENCE_URL,
     WHO_NUTRITION_URL,
     WORLD_BANK_INDICATORS,
 )
@@ -52,13 +60,31 @@ def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
     """Atualiza só os contadores; nenhuma API é chamada neste fragmento."""
     food = counter_values(float(food_waste.value or 0))
     mortality = counter_values(float(deaths.value or 0))
+    nutrition = estimate_feeding_potential(
+        food["today"],
+        HOUSEHOLD_WASTE_SHARE,
+        CONSERVATIVE_EDIBLE_SHARE,
+        REFERENCE_MEAL_KG,
+        REFERENCE_DAILY_KCAL,
+        REFERENCE_MEALS_PER_DAY,
+    )
 
     metric_card(
         "Alimentos desperdiçados hoje",
-        format_number_br(food["today"], 0),
-        "kg · estimativa",
+        format_number_br(kg_to_tonnes(food["today"]), 0),
+        "toneladas · estimativa",
         f"Taxa média derivada do total anual do UNEP ({food_waste.year}).",
         "primary",
+    )
+    metric_card(
+        "Equivalência alimentar estimada",
+        format_compact_br(nutrition["meals"]),
+        "refeições potenciais",
+        (
+            f"Ou cerca de {format_compact_br(nutrition['person_days'])} pessoas por 1 dia. "
+            "Cenário conservador para a parcela domiciliar comestível; não representa alimento efetivamente recuperável."
+        ),
+        "positive",
     )
     metric_card(
         "Carne desperdiçada hoje",
@@ -75,8 +101,8 @@ def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
     )
     metric_card(
         "Desperdício por segundo",
-        format_number_br(food["per_second"], 1),
-        "kg/s · taxa média",
+        format_number_br(kg_to_tonnes(food["per_second"]), 2),
+        "toneladas/s · taxa média",
         "O fluxo real não é uniforme ao longo do dia.",
     )
 
@@ -125,6 +151,33 @@ def render_home() -> None:
     )
 
     calculation_details(food_waste, "Como o contador de alimentos foi calculado?")
+    with st.expander("Como a equivalência em refeições foi estimada?"):
+        st.markdown(
+            f"""
+**Cenário ilustrativo e conservador — não é uma promessa de distribuição.**
+
+1. O [UNEP Food Waste Index 2024]({UNEP_REPORT_URL}) estima que os domicílios
+   respondem por **60%** do desperdício global.
+2. O mesmo relatório aplica, como limite conservador, **25% de partes comestíveis**
+   ao desperdício domiciliar e usa **420 g por refeição**.
+3. Para expressar a massa também em energia, adotamos **2.100 kcal por pessoa/dia**
+   como referência operacional aproximada e **3 refeições por dia**. Isso equivale a
+   700 kcal por refeição e a uma densidade implícita de aproximadamente
+   **1.667 kcal/kg**.
+
+**Fórmula:** desperdício total × 60% × 25% ÷ 0,420 kg = refeições potenciais.
+
+**Pessoas por 1 dia:** refeições potenciais ÷ 3.
+
+A referência energética é próxima de rações operacionais de aproximadamente
+[2.100 kcal/dia do WFP]({WFP_RATION_REFERENCE_URL}). A
+[FAO/OMS ressalta]({FAO_ENERGY_REQUIREMENTS_URL}) que necessidades energéticas variam
+por idade, sexo, massa corporal e atividade. Alimentos também variam muito em água,
+densidade calórica, qualidade nutricional e segurança. O cálculo não considera coleta,
+conservação, transporte, preparo ou acesso e **não pressupõe que todo desperdício possa
+ser reaproveitado**.
+            """
+        )
     calculation_details(deaths, "Como a estimativa de mortalidade foi calculada?")
     calculation_details(hunger, "Fonte do indicador de fome")
 
@@ -158,11 +211,13 @@ def render_world() -> None:
     food_insecurity = dashboard["food_insecurity"]
     poverty = dashboard["poverty"]
     waste = dashboard["food_waste"]
+    waste_total = dashboard["food_waste_total"]
     assert isinstance(population, Indicator)
     assert isinstance(undernourishment, Indicator)
     assert isinstance(food_insecurity, Indicator)
     assert isinstance(poverty, Indicator)
     assert isinstance(waste, Indicator)
+    assert isinstance(waste_total, Indicator)
 
     st.subheader(country_name)
     _render_indicator(population)
@@ -175,6 +230,7 @@ def render_world() -> None:
             "Percentual de subnutrição × população; a incerteza do indicador original permanece.",
         )
     _render_indicator(food_insecurity, compact=False)
+    _render_indicator(waste_total)
     _render_indicator(waste, compact=False)
     _render_indicator(poverty, compact=False)
 
@@ -406,6 +462,11 @@ reais não acontecem uniformemente durante o dia e o contador volta a zero à me
 Não significa que uma morte individual tenha sido observada ou atribuída naquele segundo.
 Do mesmo modo, apresentar fome e desperdício lado a lado evidencia uma contradição social,
 mas **não estabelece causalidade** entre as duas medidas.
+
+A equivalência em refeições usa somente um cenário conservador para a fração domiciliar
+potencialmente comestível. Ela expressa uma ordem de grandeza energética, não a quantidade
+que poderia ser coletada e entregue com segurança. Necessidades calóricas e a composição
+dos alimentos variam entre pessoas, lugares e períodos.
         """
     )
 

@@ -27,7 +27,10 @@ def global_food_waste() -> Indicator:
         indicator=payload["indicator"],
         consulted_at=datetime.now(timezone.utc),
         original_value=f"{tonnes:,.0f} toneladas/ano",
-        formula="toneladas × 1.000 = kg; kg ÷ 31.536.000 = taxa média em kg/s",
+        formula=(
+            "toneladas × 1.000 = kg (cálculo interno); toneladas ÷ 31.536.000 "
+            "= taxa média em toneladas/s"
+        ),
         note=payload["note"],
     )
 
@@ -38,4 +41,3 @@ def environmental_facts() -> dict:
         (SNAPSHOT_DIR / "official_global_indicators.json").read_text(encoding="utf-8")
     )
     return payload["environment"]
-

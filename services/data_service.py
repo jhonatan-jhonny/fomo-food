@@ -93,6 +93,48 @@ def country_dashboard(code: str) -> dict[str, Indicator | SeriesResult]:
             formula="varejo + alimentação fora do lar + domicílios",
             note="Estimativa nacional UNEP; alguns valores são extrapolados e têm diferentes níveis de confiança.",
         )
+        population_same_year = _population_for_year(series["population"], year)
+        total_tonnes = (
+            per_capita * population_same_year / 1_000
+            if population_same_year is not None
+            else None
+        )
+        if total_tonnes is None:
+            indicators["food_waste_total"] = unavailable_indicator(
+                "food_waste_total",
+                "Desperdício anual estimado",
+                waste_result.source,
+                waste_result.source_url,
+                waste_result.indicator,
+                consulted_at,
+            )
+        else:
+            indicators["food_waste_total"] = Indicator(
+                key="food_waste_total",
+                label="Desperdício anual estimado",
+                value=total_tonnes,
+                unit="toneladas/ano",
+                year=year,
+                source=waste_result.source,
+                source_url=waste_result.source_url,
+                indicator="Desperdício per capita × população do mesmo ano",
+                consulted_at=waste_result.consulted_at,
+                original_value=(
+                    f"{per_capita:.2f} kg/pessoa/ano × "
+                    f"{population_same_year:.0f} pessoas"
+                ),
+                formula="kg por pessoa/ano × população ÷ 1.000 = toneladas/ano",
+                note="Estimativa derivada; conserva as incertezas do valor per capita modelado pelo UNEP.",
+            )
+    if "food_waste_total" not in indicators:
+        indicators["food_waste_total"] = unavailable_indicator(
+            "food_waste_total",
+            "Desperdício anual estimado",
+            waste_result.source,
+            waste_result.source_url,
+            waste_result.indicator,
+            consulted_at,
+        )
     indicators["waste_series"] = waste_rows
 
     under = indicators["undernourishment"]
