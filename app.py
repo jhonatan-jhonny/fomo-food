@@ -311,6 +311,7 @@ A referência é próxima de rações operacionais de [2.100 kcal/dia do WFP]({W
             "desde 00:00. Nenhuma morte ou descarte individual é detectado pelo site."
         ),
     )
+    section_intro("Impacto climático", "O desperdício também aquece o planeta")
     metric_card(
         "Perda e desperdício de alimentos",
         environment["value"],
