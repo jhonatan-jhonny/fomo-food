@@ -189,12 +189,16 @@ def render_home() -> None:
         "Os valores abaixo descrevem crianças e não alimentam o contador de todas as idades.",
     )
     for indicator in child_indicators:
-        suffix = "crianças" if indicator.unit == "crianças" else indicator.unit
+        is_percentage = indicator.unit == "%"
+        suffix = "percentual" if is_percentage else "crianças"
+        display_value = (
+            f"{format_number_br(indicator.value, 1)}%"
+            if is_percentage
+            else format_compact_br(indicator.value)
+        )
         metric_card(
             indicator.label,
-            format_compact_br(indicator.value)
-            if indicator.unit == "crianças"
-            else format_number_br(indicator.value, 1),
+            display_value,
             f"{suffix} · {indicator.year} · {indicator.source}",
             indicator.note,
             "primary" if indicator.key == "child_severe_wasting" else "",
