@@ -13,6 +13,7 @@ sem apresentar taxas matemáticas como eventos detectados em tempo real.
 - consulta por país de população, subnutrição, insegurança alimentar e pobreza;
 - desperdício por pessoa e por setor para os países disponíveis;
 - gráficos históricos e comparações responsivas em Plotly;
+- mapa mundial interativo em Plotly Choropleth, com ISO-3, normalização e detalhes por país;
 - produção de carne bovina/búfalo, suína e de aves separada de perda/desperdício;
 - cache de 24 horas, timeout HTTP e fallback para a última resposta válida em disco;
 - metodologia, ano, fonte, valor original, fórmula e data de consulta visíveis.
@@ -30,7 +31,8 @@ pela aplicação inteira.
 │   ├── __init__.py
 │   ├── cards.py
 │   ├── charts.py
-│   └── mobile_ui.py
+│   ├── mobile_ui.py
+│   └── world_map.py
 ├── data/
 │   ├── snapshots/
 │   │   └── official_global_indicators.json
@@ -47,7 +49,8 @@ pela aplicação inteira.
 │   ├── __init__.py
 │   ├── calculations.py
 │   ├── counters.py
-│   └── data_service.py
+│   ├── data_service.py
+│   └── world_map_data.py
 ├── tests/
 │   └── test_calculations.py
 ├── utils/

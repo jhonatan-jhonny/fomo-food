@@ -14,6 +14,7 @@ from components.cards import (
 )
 from components.charts import grouped_bar, horizontal_bar, line_chart, multi_line_chart
 from components.mobile_ui import hero, inject_styles, section_intro
+from components.world_map import render_world_map
 from data.fao import global_food_insecurity, global_undernourishment
 from data.models import Indicator
 from data.owid import fetch_grapher
@@ -85,13 +86,6 @@ def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
             "Cenário conservador para a parcela domiciliar comestível; não representa alimento efetivamente recuperável."
         ),
         "positive",
-    )
-    metric_card(
-        "Carne desperdiçada hoje",
-        "Dado não disponível",
-        "sem estimativa comparável",
-        "Não há base global recente e comparável por espécie que sustente um contador em kg.",
-        "primary",
     )
     metric_card(
         "Mortes infantis associadas à má nutrição hoje",
@@ -503,10 +497,12 @@ dos alimentos variam entre pessoas, lugares e períodos.
 
 
 def main() -> None:
-    pages = ["Início", "Mundo", "Carne", "Gráficos", "Metodologia"]
+    pages = ["Início", "Mapa mundial", "Mundo", "Carne", "Gráficos", "Metodologia"]
     page = st.selectbox("Navegação", pages, label_visibility="collapsed")
     if page == "Início":
         render_home()
+    elif page == "Mapa mundial":
+        render_world_map()
     elif page == "Mundo":
         render_world()
     elif page == "Carne":
