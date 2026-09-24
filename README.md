@@ -14,7 +14,7 @@ sem apresentar taxas matemáticas como eventos detectados em tempo real.
 - consulta por país de população, subnutrição, insegurança alimentar e pobreza;
 - desperdício por pessoa e por setor para os países disponíveis;
 - gráficos históricos e comparações responsivas em Plotly;
-- mapa mundial interativo em Plotly Choropleth, com ISO-3, normalização e detalhes por país;
+- mapa mundial interativo resumido na Home e versão completa na página dedicada, ambos em Plotly Choropleth, com ISO-3 e normalização;
 - produção de carne bovina/búfalo, suína e de aves separada de perda/desperdício;
 - cache de 24 horas, timeout HTTP e fallback para a última resposta válida em disco;
 - metodologia, ano, fonte, valor original, fórmula e data de consulta visíveis.

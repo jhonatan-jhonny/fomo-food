@@ -15,7 +15,7 @@ from components.cards import (
 )
 from components.charts import grouped_bar, horizontal_bar, line_chart, multi_line_chart
 from components.mobile_ui import hero, inject_styles, section_intro
-from components.world_map import render_world_map
+from components.world_map import render_world_map, render_world_map_summary
 from data.fao import (
     global_food_insecurity,
     global_healthy_diet_unaffordable,
@@ -101,7 +101,10 @@ def live_food_waste_counters(food_waste: Indicator) -> None:
         "Alimentos desperdiçados hoje",
         format_number_br(kg_to_tonnes(food["today"]), 0),
         "toneladas · estimativa acumulada",
-        f"Taxa média derivada do total anual do UNEP ({food_waste.year}); não é medição ao vivo.",
+        (
+            "Estimativa em tempo real baseada no último dado oficial disponível: "
+            f"total anual do UNEP ({food_waste.year}). Não é medição ao vivo."
+        ),
         "primary",
     )
     metric_card(
@@ -134,12 +137,7 @@ def render_home() -> None:
     healthy_diet = global_healthy_diet_unaffordable()
 
     live_food_waste_counters(food_waste)
-    st.markdown(
-        '<div class="source-strip"><strong>Estimativa em tempo real baseada no último dado '
-        "oficial disponível.</strong> O total anual é distribuído pelo tempo apenas para mostrar "
-        "uma taxa média; o desperdício real não ocorre de modo uniforme.</div>",
-        unsafe_allow_html=True,
-    )
+    render_world_map_summary()
 
     section_intro(
         "Fome no mundo",

@@ -123,9 +123,67 @@ def _detail_card(label: str, detail: dict) -> None:
     metric_card(
         label,
         _display_value(float(value), unit),
-        f"ano: {int(year)}" if year is not None and not pd.isna(year) else "ano não informado",
+        f"ano: {int(year)}"
+        if year is not None and not pd.isna(year)
+        else "ano não informado",
         f"Fonte: {source}",
     )
+
+
+def render_world_map_summary() -> None:
+    """Versão compacta para a Home; os detalhes por país ficam na página dedicada."""
+    section_intro(
+        "Mapa mundial",
+        "A dimensão global em um toque",
+        "Escolha um indicador e passe o mouse ou toque em um país. A página “Mapa mundial” reúne os detalhes completos.",
+    )
+    indicator_label = st.selectbox(
+        "Indicador do mapa",
+        list(MAP_INDICATORS),
+        key="home_map_indicator",
+    )
+    normalize = st.toggle(
+        "Normalizar por população",
+        value=False,
+        key="home_map_normalize",
+    )
+    indicator_key = MAP_INDICATORS[indicator_label]
+
+    with st.spinner("Preparando dados mundiais…"):
+        frame, metadata = build_map_frame(indicator_key, normalize)
+
+    if frame.empty:
+        st.warning(
+            "Não foi possível carregar o mapa agora. Os demais indicadores da Home "
+            "continuam disponíveis."
+        )
+        return
+    if normalize and not metadata["normalization_applied"]:
+        st.caption(
+            "Este indicador já está normalizado ou não admite nova normalização."
+        )
+    if frame["value"].notna().sum() == 0:
+        st.warning("Fonte temporariamente indisponível para este indicador.")
+
+    fig = build_choropleth(frame, metadata["title"])
+    st.plotly_chart(
+        fig,
+        width="stretch",
+        config={"displayModeBar": False, "responsive": True, "scrollZoom": False},
+        key="home_world_choropleth",
+    )
+    st.caption("Quanto mais intensa a cor, maior o valor do indicador selecionado.")
+    st.caption(
+        "Os dados representam os períodos mais recentes disponíveis para cada país e "
+        "podem ter anos de referência diferentes. Países em cinza estão sem dados."
+    )
+
+    errors = [message for message in metadata["errors"].values() if message]
+    if errors:
+        st.warning(
+            "Uma ou mais fontes estão temporariamente indisponíveis. O mapa mantém os "
+            "demais indicadores disponíveis e usa o último cache válido quando possível."
+        )
 
 
 def render_world_map() -> None:
@@ -148,7 +206,9 @@ def render_world_map() -> None:
         )
         return
     if normalize and not metadata["normalization_applied"]:
-        st.caption("Este indicador já está normalizado ou não admite nova normalização.")
+        st.caption(
+            "Este indicador já está normalizado ou não admite nova normalização."
+        )
     if frame["value"].notna().sum() == 0:
         st.warning("Fonte temporariamente indisponível para este indicador.")
 
@@ -177,7 +237,10 @@ def render_world_map() -> None:
     clicked_iso = _selected_location(event)
     countries = frame[["iso3", "country"]].drop_duplicates().sort_values("country")
     name_by_iso = dict(zip(countries["iso3"], countries["country"], strict=False))
-    if clicked_iso in name_by_iso and st.session_state.get("last_map_click") != clicked_iso:
+    if (
+        clicked_iso in name_by_iso
+        and st.session_state.get("last_map_click") != clicked_iso
+    ):
         st.session_state["map_country_selector"] = name_by_iso[clicked_iso]
         st.session_state["last_map_click"] = clicked_iso
 
@@ -193,9 +256,9 @@ def render_world_map() -> None:
         country_names,
         key="map_country_selector",
     )
-    selected_iso = countries.loc[
-        countries["country"] == selected_country, "iso3"
-    ].iloc[0]
+    selected_iso = countries.loc[countries["country"] == selected_country, "iso3"].iloc[
+        0
+    ]
     details = country_details(str(selected_iso))
 
     _detail_card("População", details["population"])
