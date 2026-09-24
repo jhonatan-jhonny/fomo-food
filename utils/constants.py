@@ -77,6 +77,14 @@ FAO_SOFI_2026_URL = (
 WHO_NUTRITION_URL = (
     "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding"
 )
+WHO_JME_URL = (
+    "https://www.who.int/teams/nutrition-and-food-safety/monitoring-nutritional-status-"
+    "and-food-safety-and-events/joint-child-malnutrition-estimates/latest-estimates"
+)
+WHO_GHE_URL = (
+    "https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/"
+    "ghe-leading-causes-of-death"
+)
 FAO_ENERGY_REQUIREMENTS_URL = "https://www.fao.org/4/y5686e/y5686e04.htm"
 WFP_RATION_REFERENCE_URL = "https://executiveboard.wfp.org/document_download/WFP-145552"
 

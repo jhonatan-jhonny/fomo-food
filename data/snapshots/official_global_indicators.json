@@ -29,15 +29,82 @@
     "original_value": "2,1 bilhões de pessoas",
     "note": "Estimativa global; não equivale ao indicador de subnutrição crônica."
   },
+  "healthy_diet_unaffordable": {
+    "label": "Pessoas que não conseguem pagar uma dieta saudável",
+    "value": 2690000000,
+    "unit": "pessoas",
+    "reference_year": 2025,
+    "source": "FAO, IFAD, UNICEF, WFP e OMS — SOFI 2026",
+    "source_url": "https://www.fao.org/newsroom/detail/un-report--global-hunger-levels-ease-for-third-consecutive-year-as-regional-disparities-persist/",
+    "indicator": "Número de pessoas incapazes de pagar uma dieta saudável",
+    "original_value": "2,69 bilhões de pessoas (32,7% da população mundial)",
+    "note": "Acessibilidade considera o custo da dieta, a renda e despesas não alimentares essenciais; não é sinônimo de subnutrição."
+  },
+  "protein_energy_malnutrition_deaths": {
+    "label": "Mortes por desnutrição proteico-energética",
+    "value": 196555,
+    "unit": "mortes/ano",
+    "reference_year": 2021,
+    "source": "OMS — Global Health Estimates 2021 (publicado em 2024)",
+    "source_url": "https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death",
+    "indicator": "Estimated deaths: protein-energy malnutrition, both sexes, total (all ages)",
+    "original_value": "196.555 mortes estimadas; ambos os sexos, todas as idades",
+    "note": "Estimativa modelada da causa básica de morte. Difere de medidas mais amplas em que a má nutrição contribui para o risco de outras doenças."
+  },
   "malnutrition_deaths": {
     "label": "Mortes infantis associadas à má nutrição",
     "value": 2400000,
+    "unit": "mortes/ano",
     "reference_year": 2021,
     "source": "OMS — Infant and young child feeding",
     "source_url": "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding",
     "indicator": "Mortes de crianças associadas à má nutrição materna e infantil",
     "original_value": "2,4 milhões de mortes infantis associadas por ano",
     "note": "Associação epidemiológica, não contagem de eventos em tempo real nem afirmação de causalidade individual."
+  },
+  "child_stunting": {
+    "label": "Crianças com atraso no crescimento",
+    "value": 150200000,
+    "unit": "crianças",
+    "reference_year": 2024,
+    "source": "UNICEF / OMS / Banco Mundial — JME 2025",
+    "source_url": "https://www.who.int/teams/nutrition-and-food-safety/monitoring-nutritional-status-and-food-safety-and-events/joint-child-malnutrition-estimates/latest-estimates",
+    "indicator": "Stunting among children under 5 years of age",
+    "original_value": "150,2 milhões (23,2%)",
+    "note": "Menores de 5 anos. Atraso no crescimento significa baixa altura para a idade segundo os padrões de crescimento da OMS."
+  },
+  "child_wasting": {
+    "label": "Crianças com wasting / desnutrição aguda",
+    "value": 42800000,
+    "unit": "crianças",
+    "reference_year": 2024,
+    "source": "UNICEF / OMS / Banco Mundial — JME 2025",
+    "source_url": "https://www.who.int/teams/nutrition-and-food-safety/monitoring-nutritional-status-and-food-safety-and-events/joint-child-malnutrition-estimates/latest-estimates",
+    "indicator": "Wasting among children under 5 years of age",
+    "original_value": "42,8 milhões (6,6%)",
+    "note": "Menores de 5 anos. Wasting significa baixo peso para a altura; a estimativa de prevalência não representa todos os casos ocorridos ao longo do ano."
+  },
+  "child_severe_wasting": {
+    "label": "Crianças com desnutrição aguda grave",
+    "value": 12200000,
+    "unit": "crianças",
+    "reference_year": 2024,
+    "source": "UNICEF / OMS / Banco Mundial — JME 2025",
+    "source_url": "https://www.who.int/teams/nutrition-and-food-safety/monitoring-nutritional-status-and-food-safety-and-events/joint-child-malnutrition-estimates/latest-estimates",
+    "indicator": "Severe wasting among children under 5 years of age",
+    "original_value": "12,2 milhões (1,9%)",
+    "note": "Menores de 5 anos. É um subconjunto das crianças com wasting e não deve ser somado aos 42,8 milhões."
+  },
+  "child_minimum_dietary_diversity": {
+    "label": "Crianças com diversidade alimentar mínima",
+    "value": 30.8,
+    "unit": "%",
+    "reference_year": "2018–2024",
+    "source": "OMS — Infant and young child feeding",
+    "source_url": "https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding",
+    "indicator": "Children aged 6–23 months meeting minimum dietary diversity",
+    "original_value": "30,8%",
+    "note": "Crianças de 6 a 23 meses. O período agregado de referência é 2018–2024; não é uma medição de um único ano."
   },
   "environment": {
     "value": "8–10%",

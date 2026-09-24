@@ -41,6 +41,11 @@ def global_food_insecurity() -> Indicator:
     return _global_indicator("food_insecurity")
 
 
+@st.cache_data(ttl=CACHE_TTL_SECONDS, show_spinner=False)
+def global_healthy_diet_unaffordable() -> Indicator:
+    return _global_indicator("healthy_diet_unaffordable")
+
+
 @st.cache_data(show_spinner=False)
 def load_official_csv(path: str, value_column: str) -> SeriesResult:
     """Adaptador para novos downloads oficiais FAOSTAT quando não houver API adequada."""
@@ -62,4 +67,3 @@ def load_official_csv(path: str, value_column: str) -> SeriesResult:
         consulted_at=consulted_at,
         error=error,
     )
-

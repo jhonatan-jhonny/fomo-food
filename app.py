@@ -9,17 +9,26 @@ import streamlit as st
 from components.cards import (
     availability_notice,
     calculation_details,
+    info_card,
     metric_card,
     source_status,
 )
 from components.charts import grouped_bar, horizontal_bar, line_chart, multi_line_chart
 from components.mobile_ui import hero, inject_styles, section_intro
 from components.world_map import render_world_map
-from data.fao import global_food_insecurity, global_undernourishment
+from data.fao import (
+    global_food_insecurity,
+    global_healthy_diet_unaffordable,
+    global_undernourishment,
+)
 from data.models import Indicator
 from data.owid import fetch_grapher
 from data.unep import environmental_facts, global_food_waste
-from data.who import malnutrition_associated_deaths
+from data.who import (
+    child_nutrition_indicators,
+    malnutrition_associated_deaths,
+    protein_energy_malnutrition_deaths,
+)
 from data.world_bank import fetch_indicator
 from services.calculations import estimate_feeding_potential, kg_to_tonnes
 from services.counters import counter_values
@@ -30,12 +39,15 @@ from utils.constants import (
     CONSERVATIVE_EDIBLE_SHARE,
     COUNTRIES,
     FAO_ENERGY_REQUIREMENTS_URL,
+    FAO_SOFI_2026_URL,
     HOUSEHOLD_WASTE_SHARE,
     REFERENCE_DAILY_KCAL,
     REFERENCE_MEAL_KG,
     REFERENCE_MEALS_PER_DAY,
     UNEP_REPORT_URL,
     WFP_RATION_REFERENCE_URL,
+    WHO_GHE_URL,
+    WHO_JME_URL,
     WHO_NUTRITION_URL,
     WORLD_BANK_INDICATORS,
 )
@@ -57,10 +69,25 @@ PLOT_CONFIG = {"displayModeBar": False, "responsive": True}
 
 
 @st.fragment(run_every="1s")
-def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
-    """Atualiza só os contadores; nenhuma API é chamada neste fragmento."""
-    food = counter_values(float(food_waste.value or 0))
+def live_mortality_counter(deaths: Indicator) -> None:
+    """Anima uma taxa estatística; nenhuma API é chamada neste fragmento."""
     mortality = counter_values(float(deaths.value or 0))
+    metric_card(
+        "Estimativa acumulada hoje",
+        format_number_br(mortality["today"], 0),
+        "mortes por desnutrição proteico-energética · todas as idades",
+        (
+            f"Estimativa matemática baseada no total anual da OMS ({deaths.year}). "
+            "Não representa mortes detectadas neste instante."
+        ),
+        "primary",
+    )
+
+
+@st.fragment(run_every="1s")
+def live_food_waste_counters(food_waste: Indicator) -> None:
+    """Atualiza somente taxas derivadas do total anual do UNEP."""
+    food = counter_values(float(food_waste.value or 0))
     nutrition = estimate_feeding_potential(
         food["today"],
         HOUSEHOLD_WASTE_SHARE,
@@ -73,25 +100,9 @@ def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
     metric_card(
         "Alimentos desperdiçados hoje",
         format_number_br(kg_to_tonnes(food["today"]), 0),
-        "toneladas · estimativa",
-        f"Taxa média derivada do total anual do UNEP ({food_waste.year}).",
+        "toneladas · estimativa acumulada",
+        f"Taxa média derivada do total anual do UNEP ({food_waste.year}); não é medição ao vivo.",
         "primary",
-    )
-    metric_card(
-        "Equivalência alimentar estimada",
-        format_compact_br(nutrition["meals"]),
-        "refeições potenciais",
-        (
-            f"Ou cerca de {format_compact_br(nutrition['person_days'])} pessoas por 1 dia. "
-            "Cenário conservador para a parcela domiciliar comestível; não representa alimento efetivamente recuperável."
-        ),
-        "positive",
-    )
-    metric_card(
-        "Mortes infantis associadas à má nutrição hoje",
-        format_number_br(mortality["today"], 0),
-        "estimativa estatística",
-        "Não representa mortes detectadas neste instante e não atribui causalidade individual.",
     )
     metric_card(
         "Desperdício por segundo",
@@ -99,44 +110,206 @@ def live_global_counters(food_waste: Indicator, deaths: Indicator) -> None:
         "toneladas/s · taxa média",
         "O fluxo real não é uniforme ao longo do dia.",
     )
+    metric_card(
+        "Equivalência alimentar do cenário documentado",
+        format_compact_br(nutrition["meals"]),
+        "refeições potenciais",
+        (
+            f"Ou cerca de {format_compact_br(nutrition['person_days'])} pessoas por 1 dia. "
+            "Usa somente 25% da parcela domiciliar, conforme cenário conservador do UNEP; "
+            "não converte todo o desperdício."
+        ),
+        "positive",
+    )
 
 
 def render_home() -> None:
     hero()
     food_waste = global_food_waste()
-    deaths = malnutrition_associated_deaths()
+    pem_deaths = protein_energy_malnutrition_deaths()
+    child_deaths = malnutrition_associated_deaths()
+    child_indicators = child_nutrition_indicators()
     hunger = global_undernourishment()
     food_insecurity = global_food_insecurity()
+    healthy_diet = global_healthy_diet_unaffordable()
 
-    st.markdown(
-        '<div class="source-strip"><strong>Estimativa em tempo real</strong> calculada '
-        "a partir dos dados oficiais mais recentes disponíveis. Não é uma medição ao vivo "
-        "de eventos individuais.</div>",
-        unsafe_allow_html=True,
+    section_intro(
+        "Fome no mundo",
+        "Três medidas diferentes da privação alimentar",
+        "Cada indicador responde a uma pergunta distinta e mantém seu próprio ano de referência.",
     )
-    live_global_counters(food_waste, deaths)
-
     metric_card(
-        "Pessoas em situação de fome / subnutrição",
+        "Pessoas subnutridas no mundo",
         format_compact_br(hunger.value),
-        f"estimativa global · {hunger.year}",
-        "Indicador de subnutrição crônica publicado pela FAO.",
+        f"pessoas · {hunger.year} · FAO / SOFI 2026",
+        "Estimativa central de subnutrição crônica; a FAO usa este indicador para medir a fome.",
+        "primary",
     )
     metric_card(
         "Insegurança alimentar moderada ou grave",
         format_compact_br(food_insecurity.value),
-        f"pessoas · {food_insecurity.year}",
-        "É um indicador distinto da subnutrição crônica.",
+        f"pessoas · {food_insecurity.year} · FAO / SOFI 2026",
+        "Mede dificuldade regular de acesso a alimentos adequados; não equivale à subnutrição crônica.",
     )
     metric_card(
-        "Desperdício por pessoa",
-        "132",
-        "kg/pessoa/ano · 2022",
-        "Média global nos setores de varejo, serviços de alimentação e domicílios.",
+        "Sem condições de pagar uma dieta saudável",
+        format_compact_br(healthy_diet.value),
+        f"pessoas · {healthy_diet.year} · FAO / SOFI 2026",
+        "Acessibilidade considera preços, renda e despesas não alimentares essenciais.",
+    )
+    metric_card(
+        "Mortes por desnutrição proteico-energética",
+        format_number_br(pem_deaths.value, 0),
+        f"mortes/ano · todas as idades · {pem_deaths.year}",
+        (
+            f"OMS Global Health Estimates. Média matemática: "
+            f"{format_number_br(float(pem_deaths.value or 0) / 365, 0)} por dia; "
+            "não inclui todas as mortes em que a má nutrição apenas contribuiu para o risco."
+        ),
     )
 
+    st.markdown(
+        '<div class="source-strip"><strong>Estimativa em tempo real baseada no último dado '
+        "oficial disponível.</strong> O contador abaixo distribui estatisticamente o total anual; "
+        "não detecta eventos individuais.</div>",
+        unsafe_allow_html=True,
+    )
+    live_mortality_counter(pem_deaths)
+    calculation_details(pem_deaths, "Como este contador é calculado?")
+
+    section_intro(
+        "Crianças e fome",
+        "Indicadores infantis, sem misturar faixas etárias",
+        "Os valores abaixo descrevem crianças e não alimentam o contador de todas as idades.",
+    )
+    for indicator in child_indicators:
+        suffix = "crianças" if indicator.unit == "crianças" else indicator.unit
+        metric_card(
+            indicator.label,
+            format_compact_br(indicator.value)
+            if indicator.unit == "crianças"
+            else format_number_br(indicator.value, 1),
+            f"{suffix} · {indicator.year} · {indicator.source}",
+            indicator.note,
+            "primary" if indicator.key == "child_severe_wasting" else "",
+        )
+    metric_card(
+        "Mortes de crianças associadas à má nutrição materna e infantil",
+        format_compact_br(child_deaths.value),
+        f"mortes/ano · {child_deaths.year} · OMS",
+        (
+            "Indicador amplo de associação epidemiológica. Não significa que a má nutrição "
+            "tenha sido registrada como causa direta em cada morte. A ficha da OMS usa "
+            "“child deaths” sem detalhar uma faixa etária mais específica para esse total."
+        ),
+    )
+    metric_card(
+        "Mortes infantis diretamente atribuídas à desnutrição aguda grave",
+        "Dado não disponível",
+        "total global comparável",
+        (
+            "Não foi localizado um total mundial oficial que meça exclusivamente essa causa "
+            "direta com metodologia comparável. Ausência de dado não significa zero."
+        ),
+    )
+    info_card(
+        "A fome nem sempre aparece como causa direta da morte.",
+        (
+            "A desnutrição enfraquece o organismo e aumenta o risco de morte por doenças como "
+            "diarreia, pneumonia e outras infecções. Por isso, existem diferenças entre mortes "
+            "diretamente causadas pela desnutrição e mortes em que a desnutrição contribuiu para o risco."
+        ),
+    )
+
+    section_intro(
+        "Desperdício de alimentos",
+        "Peso, origem e limites da equivalência alimentar",
+        "Os valores principais são exibidos em toneladas; indicadores por habitante permanecem em kg.",
+    )
+    metric_card(
+        "Alimentos desperdiçados por ano",
+        format_number_br(kg_to_tonnes(float(food_waste.value or 0)), 0),
+        f"toneladas/ano · {food_waste.year} · UNEP",
+        "Varejo, serviços de alimentação e domicílios; inclui partes comestíveis e não comestíveis.",
+        "primary",
+    )
+    metric_card(
+        "Desperdício por habitante",
+        "132",
+        "kg/pessoa/ano · 2022 · UNEP",
+        "Média global dos três setores medidos pelo Food Waste Index 2024.",
+    )
+    metric_card("Origem: residências", "60%", "do total global · 2022 · UNEP")
+    metric_card(
+        "Origem: serviços de alimentação", "28%", "do total global · 2022 · UNEP"
+    )
+    metric_card("Origem: varejo", "12%", "do total global · 2022 · UNEP")
+    info_card(
+        "Nem tudo que entra nas estatísticas de desperdício poderia ser servido em um prato.",
+        (
+            "As estatísticas de desperdício alimentar podem incluir partes não comestíveis, como "
+            "ossos, cascas, caroços e outras partes descartadas dos alimentos. Por isso, uma tonelada "
+            "de desperdício não significa necessariamente uma tonelada de comida que poderia alimentar pessoas."
+        ),
+        "caution",
+    )
+    with st.expander("Entenda melhor"):
+        st.markdown(
+            """
+- O desperdício pode incluir partes comestíveis e não comestíveis.
+- Países podem usar metodologias e níveis de cobertura diferentes.
+- Peso desperdiçado não pode ser convertido diretamente em refeições sem conhecer a composição dos alimentos.
+- Uma estimativa de refeições deve usar somente a parcela comestível quando houver base confiável.
+
+Por isso, o FOMO não transforma automaticamente todo o total global em refeições. A equivalência abaixo aparece apenas porque o relatório do UNEP publica um cenário conservador específico para a parcela domiciliar.
+            """
+        )
+    st.markdown(
+        '<div class="source-strip"><strong>Estimativa em tempo real baseada no último dado '
+        "oficial disponível.</strong> O total anual é distribuído pelo tempo apenas para mostrar "
+        "uma taxa média; o desperdício real não ocorre de modo uniforme.</div>",
+        unsafe_allow_html=True,
+    )
+    live_food_waste_counters(food_waste)
+    calculation_details(food_waste, "Como este contador é calculado?")
+    with st.expander("Como a equivalência alimentar foi estimada?"):
+        st.markdown(
+            f"""
+**Cenário ilustrativo e conservador — não é uma promessa de distribuição.**
+
+1. O [UNEP Food Waste Index 2024]({UNEP_REPORT_URL}) atribui **60%** do desperdício global aos domicílios.
+2. O relatório aplica, em seu cenário conservador, **25% de partes comestíveis** somente ao desperdício domiciliar e usa **420 g por refeição**.
+3. O painel usa **2.100 kcal por pessoa/dia** e **3 refeições por dia** como referência operacional aproximada.
+
+**Fórmula:** desperdício total × 60% domiciliar × 25% comestível ÷ 0,420 kg = refeições potenciais.
+
+**Pessoas por 1 dia:** refeições potenciais ÷ 3.
+
+A referência é próxima de rações operacionais de [2.100 kcal/dia do WFP]({WFP_RATION_REFERENCE_URL}). A [FAO/OMS ressalta]({FAO_ENERGY_REQUIREMENTS_URL}) que necessidades variam por idade, sexo, massa corporal e atividade. A estimativa não considera segurança sanitária, deterioração, coleta, conservação, transporte, preparo ou acesso e não afirma que esse volume esteja recuperável.
+            """
+        )
+
     environment = environmental_facts()
-    section_intro("Impacto", "O desperdício também aquece o planeta")
+    section_intro(
+        "O que esses números significam?",
+        "Medidas relacionadas, mas não intercambiáveis",
+        "A leitura responsável exige observar definição, população, ano e método de cada número.",
+    )
+    info_card(
+        "Subnutrição, insegurança alimentar e dieta saudável medem coisas diferentes.",
+        (
+            "Uma pessoa pode enfrentar dificuldade de acesso a alimentos sem cumprir o critério de "
+            "subnutrição crônica. Também pode consumir calorias suficientes e ainda não conseguir pagar "
+            "uma dieta variada e nutricionalmente adequada."
+        ),
+    )
+    info_card(
+        "Contadores animados são estimativas, não sensores.",
+        (
+            "Eles dividem um total anual pelo número de segundos do ano e mostram o acumulado médio "
+            "desde 00:00. Nenhuma morte ou descarte individual é detectado pelo site."
+        ),
+    )
     metric_card(
         "Perda e desperdício de alimentos",
         environment["value"],
@@ -144,36 +317,32 @@ def render_home() -> None:
         environment["note"],
     )
 
-    calculation_details(food_waste, "Como o contador de alimentos foi calculado?")
-    with st.expander("Como a equivalência em refeições foi estimada?"):
+    section_intro(
+        "Fontes e metodologia",
+        "Cada card pode ser auditado",
+        "Os períodos diferem porque as organizações atualizam cada indicador em calendários próprios.",
+    )
+    calculation_details(hunger, "Subnutrição: fonte e método")
+    calculation_details(food_insecurity, "Insegurança alimentar: fonte e método")
+    calculation_details(healthy_diet, "Dieta saudável: fonte e método")
+    for indicator in child_indicators:
+        calculation_details(indicator, f"{indicator.label}: fonte e método")
+    calculation_details(child_deaths, "Mortalidade infantil associada: fonte e limite")
+    now = datetime.now(ZoneInfo(APP_TIMEZONE)).strftime("%d/%m/%Y %H:%M")
+    source_status("FAO, IFAD, UNICEF, WFP e OMS — SOFI", "2025 (relatório 2026)", now)
+    source_status("UNICEF / OMS / Banco Mundial — JME", "2024 (edição 2025)", now)
+    source_status("OMS — Global Health Estimates", "2021 (publicado em 2024)", now)
+    source_status("UNEP — Food Waste Index", "2022 (relatório 2024)", now)
+    with st.expander("Abrir fontes oficiais"):
         st.markdown(
             f"""
-**Cenário ilustrativo e conservador — não é uma promessa de distribuição.**
-
-1. O [UNEP Food Waste Index 2024]({UNEP_REPORT_URL}) estima que os domicílios
-   respondem por **60%** do desperdício global.
-2. O mesmo relatório aplica, como limite conservador, **25% de partes comestíveis**
-   ao desperdício domiciliar e usa **420 g por refeição**.
-3. Para expressar a massa também em energia, adotamos **2.100 kcal por pessoa/dia**
-   como referência operacional aproximada e **3 refeições por dia**. Isso equivale a
-   700 kcal por refeição e a uma densidade implícita de aproximadamente
-   **1.667 kcal/kg**.
-
-**Fórmula:** desperdício total × 60% × 25% ÷ 0,420 kg = refeições potenciais.
-
-**Pessoas por 1 dia:** refeições potenciais ÷ 3.
-
-A referência energética é próxima de rações operacionais de aproximadamente
-[2.100 kcal/dia do WFP]({WFP_RATION_REFERENCE_URL}). A
-[FAO/OMS ressalta]({FAO_ENERGY_REQUIREMENTS_URL}) que necessidades energéticas variam
-por idade, sexo, massa corporal e atividade. Alimentos também variam muito em água,
-densidade calórica, qualidade nutricional e segurança. O cálculo não considera coleta,
-conservação, transporte, preparo ou acesso e **não pressupõe que todo desperdício possa
-ser reaproveitado**.
+- [FAO — SOFI 2026]({FAO_SOFI_2026_URL})
+- [OMS — Global Health Estimates]({WHO_GHE_URL})
+- [UNICEF / OMS / Banco Mundial — Joint Child Malnutrition Estimates]({WHO_JME_URL})
+- [OMS — Infant and young child feeding]({WHO_NUTRITION_URL})
+- [UNEP — Food Waste Index Report 2024]({UNEP_REPORT_URL})
             """
         )
-    calculation_details(deaths, "Como a estimativa de mortalidade foi calculada?")
-    calculation_details(hunger, "Fonte do indicador de fome")
 
 
 def _render_indicator(indicator: Indicator, compact: bool = True) -> None:
@@ -280,7 +449,9 @@ def render_world() -> None:
 
     errors = [result.error for result in series.values() if result.error]
     if errors:
-        st.warning("Uma ou mais fontes estão temporariamente indisponíveis; quando possível, foi usado o último cache válido.")
+        st.warning(
+            "Uma ou mais fontes estão temporariamente indisponíveis; quando possível, foi usado o último cache válido."
+        )
 
 
 def render_meat() -> None:
@@ -308,12 +479,16 @@ def render_meat() -> None:
             "O índice cobre perdas da pós-colheita até antes do varejo; não mede o desperdício doméstico."
         )
 
-    country_name = st.selectbox("Produção por país", list(COUNTRIES), index=0, key="meat_country")
+    country_name = st.selectbox(
+        "Produção por país", list(COUNTRIES), index=0, key="meat_country"
+    )
     frame, errors = production_by_category(COUNTRIES[country_name])
     if frame.empty:
         availability_notice("Fonte de produção temporariamente indisponível.")
     else:
-        recent = frame[frame["year"] >= max(frame["year"].max() - 20, frame["year"].min())]
+        recent = frame[
+            frame["year"] >= max(frame["year"].max() - 20, frame["year"].min())
+        ]
         st.plotly_chart(
             multi_line_chart(
                 recent,
@@ -356,9 +531,9 @@ def _food_waste_frames() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         "Northern America (UN)",
         "Oceania (UN)",
     ]
-    regions = data[(data["entity"].isin(region_names)) & (data["year"] == data["year"].max())][
-        ["entity", "value"]
-    ]
+    regions = data[
+        (data["entity"].isin(region_names)) & (data["year"] == data["year"].max())
+    ][["entity", "value"]]
     world = data[data["entity"] == "World"]
     return countries, regions, world
 
@@ -391,7 +566,9 @@ def render_charts() -> None:
                 width="stretch",
                 config=PLOT_CONFIG,
             )
-            st.caption(f"Fonte: {result.source}. Último ano disponível: {int(result.data.year.max())}.")
+            st.caption(
+                f"Fonte: {result.source}. Último ano disponível: {int(result.data.year.max())}."
+            )
         else:
             availability_notice("Fonte temporariamente indisponível.")
         return
@@ -406,7 +583,9 @@ def render_charts() -> None:
                 width="stretch",
                 config=PLOT_CONFIG,
             )
-            st.caption("A série comparável possui dois pontos (2019 e 2022); não há interpolação.")
+            st.caption(
+                "A série comparável possui dois pontos (2019 e 2022); não há interpolação."
+            )
     elif chart_name == "Desperdício por região":
         if regions.empty:
             availability_notice("Dado regional temporariamente indisponível.")
@@ -425,7 +604,9 @@ def render_charts() -> None:
                 width="stretch",
                 config=PLOT_CONFIG,
             )
-            st.caption("A comparação é descritiva. Não implica causalidade com fome ou mortalidade.")
+            st.caption(
+                "A comparação é descritiva. Não implica causalidade com fome ou mortalidade."
+            )
     elif chart_name == "Produção de carne":
         frame, _ = production_by_category("WLD")
         if frame.empty:
@@ -452,10 +633,12 @@ Para um total anual `V`, a taxa média é `V ÷ 31.536.000`. O acumulado exibido
 taxa multiplicada pelos segundos decorridos desde 00:00 no fuso de São Paulo. Eventos
 reais não acontecem uniformemente durante o dia e o contador volta a zero à meia-noite.
 
-“Associada à má nutrição” descreve uma associação epidemiológica publicada pela OMS.
-Não significa que uma morte individual tenha sido observada ou atribuída naquele segundo.
-Do mesmo modo, apresentar fome e desperdício lado a lado evidencia uma contradição social,
-mas **não estabelece causalidade** entre as duas medidas.
+“Mortes por desnutrição proteico-energética” é uma estimativa de causa básica do Global
+Health Estimates da OMS, para todas as idades. Já “associada à má nutrição” descreve uma
+associação epidemiológica infantil mais ampla. Nenhuma das duas medidas significa que uma
+morte individual tenha sido observada naquele segundo. Do mesmo modo, apresentar fome e
+desperdício lado a lado evidencia uma contradição social, mas **não estabelece causalidade**
+entre as duas medidas.
 
 A equivalência em refeições usa somente um cenário conservador para a fração domiciliar
 potencialmente comestível. Ela expressa uma ordem de grandeza energética, não a quantidade
@@ -478,17 +661,41 @@ dos alimentos variam entre pessoas, lugares e períodos.
 
     st.subheader("Fontes e última atualização")
     now = datetime.now(ZoneInfo(APP_TIMEZONE))
-    source_status("UNEP — Food Waste Index", "2022 (relatório 2024)", now.strftime("%d/%m/%Y %H:%M"))
+    source_status(
+        "UNEP — Food Waste Index",
+        "2022 (relatório 2024)",
+        now.strftime("%d/%m/%Y %H:%M"),
+    )
     source_status("FAO — SOFI", "2025 (relatório 2026)", now.strftime("%d/%m/%Y %H:%M"))
-    source_status("OMS — má nutrição e mortalidade infantil", "2021", now.strftime("%d/%m/%Y %H:%M"))
-    source_status("Banco Mundial / FAO — séries nacionais", "varia por indicador", now.strftime("%d/%m/%Y %H:%M"))
-    source_status("Our World in Data / FAO / UNEP", "varia por série", now.strftime("%d/%m/%Y %H:%M"))
+    source_status(
+        "OMS — Global Health Estimates",
+        "2021 (publicado em 2024)",
+        now.strftime("%d/%m/%Y %H:%M"),
+    )
+    source_status(
+        "UNICEF / OMS / Banco Mundial — JME",
+        "2024 (edição 2025)",
+        now.strftime("%d/%m/%Y %H:%M"),
+    )
+    source_status(
+        "Banco Mundial / FAO — séries nacionais",
+        "varia por indicador",
+        now.strftime("%d/%m/%Y %H:%M"),
+    )
+    source_status(
+        "Our World in Data / FAO / UNEP",
+        "varia por série",
+        now.strftime("%d/%m/%Y %H:%M"),
+    )
 
     with st.expander("Links das fontes"):
         st.markdown(
             f"""
 - [UNEP — Food Waste Index Report 2024]({UNEP_REPORT_URL})
+- [FAO — SOFI 2026]({FAO_SOFI_2026_URL})
 - [FAO — FAOSTAT](https://www.fao.org/faostat/en/#data)
+- [OMS — Global Health Estimates]({WHO_GHE_URL})
+- [UNICEF / OMS / Banco Mundial — Joint Child Malnutrition Estimates]({WHO_JME_URL})
 - [OMS — alimentação de lactentes e crianças]({WHO_NUTRITION_URL})
 - [Banco Mundial — documentação da API](https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures)
 - [Our World in Data — Food waste per capita](https://ourworldindata.org/grapher/food-waste-per-capita)

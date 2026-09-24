@@ -231,6 +231,48 @@ def inject_styles() -> None:
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
         }
+        .info-card {
+            position: relative;
+            overflow: hidden;
+            padding: 1.15rem 1.1rem 1.08rem;
+            margin: .8rem 0;
+            border: 1px solid rgba(183,167,255,.2);
+            border-radius: 21px;
+            background:
+                linear-gradient(145deg, rgba(183,167,255,.09), rgba(255,255,255,.018) 62%),
+                rgba(17, 23, 38, .52);
+            box-shadow: 0 17px 42px rgba(0,0,0,.27), inset 0 1px 0 rgba(255,255,255,.075);
+            backdrop-filter: blur(18px) saturate(125%);
+            -webkit-backdrop-filter: blur(18px) saturate(125%);
+        }
+        .info-card::after {
+            content: "";
+            position: absolute;
+            width: 8rem; height: 8rem; right: -4.8rem; top: -5rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(183,167,255,.16), transparent 72%);
+            pointer-events: none;
+        }
+        .info-card.caution {
+            border-color: rgba(255,142,122,.2);
+            background:
+                linear-gradient(145deg, rgba(255,142,122,.07), rgba(255,255,255,.016) 62%),
+                rgba(20, 24, 37, .54);
+        }
+        .info-card-title {
+            color: var(--fomo-text);
+            font-weight: 740;
+            font-size: 1.02rem;
+            line-height: 1.38;
+            letter-spacing: -.015em;
+            padding-right: 1rem;
+        }
+        .info-card p {
+            color: #BBC6D4;
+            font-size: .91rem;
+            line-height: 1.58;
+            margin: .62rem 0 0;
+        }
         .section-heading { margin: 2.35rem 0 1rem; }
         .section-title {
             color: var(--fomo-text);
@@ -353,7 +395,7 @@ def inject_styles() -> None:
         * { scrollbar-color: rgba(143,183,255,.3) transparent; scrollbar-width: thin; }
         ::selection { background: rgba(143,183,255,.28); color: #fff; }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-            .data-card, .hero-shell, .source-strip, div[data-testid="stExpander"],
+            .data-card, .hero-shell, .source-strip, .info-card, div[data-testid="stExpander"],
             div[data-testid="stPlotlyChart"] { background-color: #111A28; }
         }
         @media (max-width: 430px) {
@@ -364,6 +406,7 @@ def inject_styles() -> None:
             }
             .hero-shell { padding: 1.12rem 1rem 1.25rem; border-radius: 23px; }
             .data-card { padding: 1.18rem 1.05rem 1.08rem; border-radius: 21px; margin: .7rem 0; }
+            .info-card { padding: 1.08rem 1rem 1rem; border-radius: 19px; }
             .card-note { font-size: .86rem; }
             .section-heading { margin-top: 2rem; }
             div[data-testid="stPlotlyChart"] { border-radius: 18px; }

@@ -7,9 +7,10 @@ sem apresentar taxas matemáticas como eventos detectados em tempo real.
 ## O que funciona nesta versão
 
 - contador em toneladas de alimentos desperdiçados desde 00:00, derivado do total anual do UNEP;
-- equivalência estimada em refeições e pessoas alimentadas por um dia, com hipóteses visíveis;
-- estimativa diária de mortes infantis **associadas** à má nutrição, com ressalva explícita;
-- totais globais mais recentes de fome e insegurança alimentar publicados pela FAO;
+- equivalência estimada em refeições e pessoas alimentadas por um dia somente para o cenário domiciliar comestível documentado pelo UNEP;
+- estimativa diária de mortes por desnutrição proteico-energética, todas as idades, derivada do total anual da OMS e identificada como estimativa;
+- totais globais mais recentes de fome, insegurança alimentar e inacessibilidade econômica de uma dieta saudável publicados no SOFI 2026;
+- seção infantil separada com atraso no crescimento, wasting, wasting grave, diversidade alimentar mínima e mortalidade associada;
 - consulta por país de população, subnutrição, insegurança alimentar e pobreza;
 - desperdício por pessoa e por setor para os países disponíveis;
 - gráficos históricos e comparações responsivas em Plotly;
@@ -126,11 +127,21 @@ Fonte: <https://www.fao.org/faostat/en/#data>
 
 ### OMS
 
-`data/who.py` expõe a estimativa publicada de 2,4 milhões de mortes infantis anuais
-associadas à má nutrição materna e infantil (referência epidemiológica de 2021). O texto
-da interface evita tratar associação como causalidade individual.
+`data/who.py` expõe dois conceitos que permanecem separados na interface: 196.555 mortes
+estimadas por desnutrição proteico-energética em 2021, todas as idades e ambos os sexos,
+na planilha oficial *Global Health Estimates*; e 2,4 milhões de mortes de crianças
+associadas à má nutrição materna e infantil. O segundo valor é uma associação
+epidemiológica mais ampla e não é apresentado como causa direta.
+
+O mesmo adaptador lê o recorte versionado do JME 2025, produzido por UNICEF, OMS e
+Banco Mundial: 150,2 milhões de crianças menores de 5 anos com atraso no crescimento,
+42,8 milhões com wasting e 12,2 milhões com wasting grave, todos referentes a 2024.
 
 Fonte: <https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding>
+
+Global Health Estimates: <https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/ghe-leading-causes-of-death>
+
+Joint Child Malnutrition Estimates: <https://www.who.int/teams/nutrition-and-food-safety/monitoring-nutritional-status-and-food-safety-and-events/joint-child-malnutrition-estimates/latest-estimates>
 
 ### Banco Mundial
 
@@ -159,6 +170,11 @@ estimativa de hoje = taxa média × segundos decorridos desde 00:00
 
 Os resultados principais são exibidos em toneladas. Quilogramas permanecem somente
 quando são a unidade mais natural, como nos indicadores por pessoa.
+
+O contador de mortalidade usa a mesma lógica, mas parte exclusivamente do total anual
+de mortes cuja causa estimada é desnutrição proteico-energética. Ele não deve ser lido
+como detecção de mortes nem confundido com o indicador infantil mais amplo de mortes em
+que a má nutrição contribuiu para o risco.
 
 ### Equivalência em refeições
 

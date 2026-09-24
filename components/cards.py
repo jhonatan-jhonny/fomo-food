@@ -23,35 +23,55 @@ def metric_card(
         <div class="data-card {safe_variant}">
           <div class="card-label">{escape(label)}</div>
           <div class="{value_class}">{escape(value)}</div>
-          {f'<div class="card-unit">{escape(unit)}</div>' if unit else ''}
-          {f'<div class="card-note">{escape(note)}</div>' if note else ''}
+          {f'<div class="card-unit">{escape(unit)}</div>' if unit else ""}
+          {f'<div class="card-note">{escape(note)}</div>' if note else ""}
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 
-def calculation_details(indicator: Indicator, title: str = "Como este número foi calculado?") -> None:
+def info_card(title: str, text: str, variant: str = "clinical") -> None:
+    """Exibe uma explicação curta sem competir visualmente com os números."""
+    safe_variant = variant if variant in {"clinical", "caution"} else "clinical"
+    st.markdown(
+        f"""
+        <aside class="info-card {safe_variant}">
+          <div class="info-card-title">{escape(title)}</div>
+          <p>{escape(text)}</p>
+        </aside>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def calculation_details(
+    indicator: Indicator, title: str = "Como este número foi calculado?"
+) -> None:
     with st.expander(title):
         st.markdown(
             f"""
-**Fonte:** [{indicator.source}]({indicator.source_url})  
-**Indicador:** {indicator.indicator}  
-**Período do dado:** {indicator.year or 'não informado'}  
-**Valor original:** {indicator.original_value or 'não informado'}  
-**Fórmula:** {indicator.formula}  
-**Consulta:** {format_date_br(indicator.consulted_at)}  
+- **Fonte:** [{indicator.source}]({indicator.source_url})
+- **Indicador:** {indicator.indicator}
+- **Período do dado:** {indicator.year or "não informado"}
+- **Valor original:** {indicator.original_value or "não informado"}
+- **Fórmula:** {indicator.formula}
+- **Consulta:** {format_date_br(indicator.consulted_at)}
 
 {indicator.note}
             """
         )
 
 
-def availability_notice(message: str = "Dado não disponível para este país/período.") -> None:
+def availability_notice(
+    message: str = "Dado não disponível para este país/período.",
+) -> None:
     st.info(message, icon="ℹ️")
 
 
-def source_status(name: str, period: str, consulted: str, fallback: bool = False) -> None:
+def source_status(
+    name: str, period: str, consulted: str, fallback: bool = False
+) -> None:
     suffix = " · último cache válido" if fallback else ""
     st.markdown(
         f"""
