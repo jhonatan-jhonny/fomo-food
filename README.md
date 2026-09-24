@@ -21,6 +21,14 @@ sem apresentar taxas matemáticas como eventos detectados em tempo real.
 Não há Flask, Django, FastAPI, React ou servidor separado. O Streamlit é responsável
 pela aplicação inteira.
 
+## Identidade visual
+
+A interface usa uma paleta fria e clínica sobre fundo `#070B11`, com azul medicinal,
+ciano e lilás como destaques. Cards, gráficos, seletores e painéis adotam glassmorphism
+com transparência, bordas translúcidas e `backdrop-filter`, além de fallback opaco para
+navegadores sem suporte. O layout foi verificado sem rolagem horizontal em 360, 390 e
+430 px e respeita `prefers-reduced-motion`.
+
 ## Estrutura
 
 ```text

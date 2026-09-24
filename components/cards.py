@@ -54,6 +54,12 @@ def availability_notice(message: str = "Dado não disponível para este país/pe
 def source_status(name: str, period: str, consulted: str, fallback: bool = False) -> None:
     suffix = " · último cache válido" if fallback else ""
     st.markdown(
-        f"**{name}**  \nÚltimo período disponível: {period}  \nConsultado em: {consulted}{suffix}"
+        f"""
+        <div class="source-status">
+          <strong>{escape(name)}</strong><br>
+          Último período disponível: {escape(period)}<br>
+          Consultado em: {escape(consulted + suffix)}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-

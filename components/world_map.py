@@ -41,7 +41,7 @@ def build_choropleth(frame: pd.DataFrame, title: str) -> object:
         color="value",
         hover_name="country",
         projection="natural earth",
-        color_continuous_scale=["#3a211f", "#ad3f2d", "#ff795b", "#ffd0c5"],
+        color_continuous_scale=["#172235", "#2D4C76", "#608FD1", "#8FB7FF", "#DCE8FF"],
         title=title,
         custom_data=["display_value", "display_year", "source", "iso3"],
     )
@@ -58,21 +58,21 @@ def build_choropleth(frame: pd.DataFrame, title: str) -> object:
         unselected_marker_opacity=0.72,
     )
     fig.update_geos(
-        bgcolor="#101319",
+        bgcolor="rgba(0,0,0,0)",
         showframe=False,
         showcoastlines=False,
         showland=True,
-        landcolor="#292e37",
+        landcolor="#252D3A",
         showocean=True,
-        oceancolor="#0c0f14",
+        oceancolor="rgba(7,11,17,.72)",
         showcountries=True,
         countrycolor="rgba(255,255,255,.10)",
     )
     fig.update_layout(
         template="plotly_dark",
-        paper_bgcolor="#101319",
-        plot_bgcolor="#101319",
-        font={"color": "#dfe3e8", "size": 12},
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "#DCE4EE", "size": 12, "family": "Inter, Segoe UI, sans-serif"},
         height=MAP_HEIGHT,
         margin={"l": 0, "r": 0, "t": 52, "b": 0},
         dragmode=False,

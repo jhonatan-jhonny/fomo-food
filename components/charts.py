@@ -4,11 +4,14 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-BG = "#101319"
-GRID = "rgba(255,255,255,.08)"
-TEXT = "#dfe3e8"
-ACCENT = "#ff6846"
-GREEN = "#42c48a"
+BG = "rgba(0,0,0,0)"
+GRID = "rgba(185,205,232,.09)"
+TEXT = "#DCE4EE"
+MUTED = "#9EABBC"
+ACCENT = "#8FB7FF"
+CYAN = "#7ED7D1"
+LILAC = "#B7A7FF"
+ALERT = "#FF8E7A"
 
 
 def _finish(fig: go.Figure, y_title: str = "") -> go.Figure:
@@ -16,14 +19,14 @@ def _finish(fig: go.Figure, y_title: str = "") -> go.Figure:
         template="plotly_dark",
         paper_bgcolor=BG,
         plot_bgcolor=BG,
-        font={"color": TEXT, "size": 12},
+        font={"color": TEXT, "size": 12, "family": "Inter, Segoe UI, sans-serif"},
         margin={"l": 12, "r": 12, "t": 48, "b": 18},
         height=390,
-        legend={"orientation": "h", "y": -0.2, "title": ""},
+        legend={"orientation": "h", "y": -0.2, "title": "", "font": {"color": MUTED}},
         hovermode="x unified",
     )
-    fig.update_xaxes(gridcolor=GRID, title="")
-    fig.update_yaxes(gridcolor=GRID, title=y_title)
+    fig.update_xaxes(gridcolor=GRID, title="", linecolor="rgba(255,255,255,.08)")
+    fig.update_yaxes(gridcolor=GRID, title=y_title, linecolor="rgba(255,255,255,.08)")
     return fig
 
 
@@ -46,7 +49,7 @@ def multi_line_chart(
         color=color_column,
         markers=True,
         title=title,
-        color_discrete_sequence=[ACCENT, GREEN, "#f3bd52", "#668dff", "#c478ff"],
+        color_discrete_sequence=[ACCENT, CYAN, LILAC, ALERT, "#6E8FC6"],
     )
     fig.update_traces(line={"width": 2.5})
     return _finish(fig, y_title)
@@ -67,7 +70,7 @@ def grouped_bar(
         color=color,
         barmode="group",
         title=title,
-        color_discrete_sequence=[ACCENT, "#f3bd52", GREEN, "#668dff"],
+        color_discrete_sequence=[ACCENT, CYAN, LILAC, ALERT],
     )
     return _finish(fig, y_title)
 
@@ -81,8 +84,7 @@ def horizontal_bar(frame: pd.DataFrame, title: str, x_title: str) -> go.Figure:
         orientation="h",
         title=title,
         color="value",
-        color_continuous_scale=["#562d28", ACCENT],
+        color_continuous_scale=["#172235", "#355986", ACCENT, "#DCE8FF"],
     )
     fig.update_layout(coloraxis_showscale=False, showlegend=False)
     return _finish(fig, x_title)
-
